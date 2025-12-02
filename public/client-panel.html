@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Klienta - Tracking Pracy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="client-container">
+        <!-- Nagłówek -->
+        <header class="client-header">
+            <div class="header-left">
+                <i class="fas fa-user"></i>
+                <div>
+                    <h1>Witaj, <span id="client-name">Kliencie</span></h1>
+                    <p id="client-email">email@klient.pl</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="client-logout-btn" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Wyloguj
+                </button>
+            </div>
+        </header>
+        
+        <div class="client-content">
+            <!-- Panel boczny z listą sesji -->
+            <div class="sessions-sidebar">
+                <div class="sessions-header">
+                    <h3><i class="fas fa-history"></i> Historia prac</h3>
+                    <button id="refresh-sessions" class="btn-refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="sessions-list" id="sessions-list">
+                    <!-- Sesje będą wczytywane dynamicznie -->
+                    <p class="no-sessions">Ładowanie sesji...</p>
+                </div>
+                
+                <div class="client-stats">
+                    <h4>Statystyki</h4>
+                    <div class="stat-item">
+                        <span>Łączny czas pracy:</span>
+                        <span id="client-total-time">0h 0m</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Liczba sesji:</span>
+                        <span id="client-sessions-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Ostatnia praca:</span>
+                        <span id="client-last-work">Brak</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Główny panel z mapą i szczegółami -->
+            <div class="client-main-panel">
+                <div class="map-container">
+                    <div id="client-map" class="map"></div>
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <span class="legend-color start"></span>
+                            <span>Początek pracy</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color end"></span>
+                            <span>Koniec pracy</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color photo"></span>
+                            <span>Zdjęcie</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="session-details">
+                    <div class="session-header">
+                        <h3 id="selected-session-date">Wybierz sesję</h3>
+                        <button id="print-report" class="btn-print">
+                            <i class="fas fa-print"></i> Drukuj raport
+                        </button>
+                    </div>
+                    
+                    <div class="session-info-grid">
+                        <div class="info-card">
+                            <i class="fas fa-clock"></i>
+                            <h4>Czas pracy</h4>
+                            <p id="session-time">--:-- - --:--</p>
+                            <p id="session-duration">0h 0m</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-route"></i>
+                            <h4>Trasa</h4>
+                            <p id="session-distance">0 km</p>
+                            <p id="session-points">0 punktów</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-camera"></i>
+                            <h4>Dokumentacja</h4>
+                            <p id="session-photos">0 zdjęć</p>
+                            <button id="view-all-photos" class="btn-view-photos">
+                                Zobacz wszystkie
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="photos-section">
+                        <h4><i class="fas fa-images"></i> Zdjęcia z pracy</h4>
+                        <div id="session-photos-gallery" class="photos-gallery">
+                            <!-- Zdjęcia będą wczytywane dynamicznie -->
+                            <p class="no-photos">Wybierz sesję aby zobaczyć zdjęcia</p>
+                        </div>
+                    </div>
+                    
+                    <div class="notes-section">
+                        <h4><i class="fas fa-sticky-note"></i> Notatki pracownika</h4>
+                        <div id="session-notes" class="notes-content">
+                            <p>Wybierz sesję aby zobaczyć notatki</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stopka -->
+        <footer class="client-footer">
+            <p><i class="fas fa-shield-alt"></i> Twoje dane są bezpieczne. Sesja wygaśnie za <span id="session-timer">29:59</span></p>
+            <p id="last-update">Ostatnia aktualizacja: --:--</p>
+        </footer>
+    </div>
+    
+    <!-- Modal do podglądu zdjęć -->
+    <div id="photo-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="modal-photo" src="" alt="Zdjęcie">
+            <div class="photo-meta">
+                <p id="modal-photo-time">Godzina: --:--</p>
+                <p id="modal-photo-location">Lokalizacja: Nieznana</p>
+                <p id="modal-photo-desc">Opis: Brak opisu</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Biblioteki JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script src="client-script.js"></script>
+</body>
+</html>

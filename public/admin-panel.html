@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pracownika - Tracking Pracy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Nagłówek -->
+        <header class="admin-header">
+            <div class="header-left">
+                <i class="fas fa-hard-hat"></i>
+                <div>
+                    <h1>Panel Pracownika</h1>
+                    <p>Zalogowany: <span id="worker-name">Pracownik</span></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div id="current-time" class="time-display">00:00:00</div>
+                <button onclick="window.location.href='user-management.html'" class="btn-control">
+                    <i class="fas fa-users"></i> Użytkownicy
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Wyloguj
+                </button>
+            </div>
+        </header>
+        
+        <div class="admin-content">
+            <!-- Lewy panel - sterowanie -->
+            <div class="control-panel">
+                <div class="status-card">
+                    <h3><i class="fas fa-play-circle"></i> Status pracy</h3>
+                    <div id="work-status" class="status stopped">
+                        <span class="status-indicator"></span>
+                        PRZERWA
+                    </div>
+                    <div id="work-timer" class="timer">00:00:00</div>
+                </div>
+                
+                <div class="control-card">
+                    <h3><i class="fas fa-cogs"></i> Sterowanie</h3>
+                    <button id="start-work-btn" class="btn-control start">
+                        <i class="fas fa-play"></i> Rozpocznij pracę
+                    </button>
+                    <button id="stop-work-btn" class="btn-control stop" disabled>
+                        <i class="fas fa-stop"></i> Zakończ pracę
+                    </button>
+                    <button id="pause-work-btn" class="btn-control pause" disabled>
+                        <i class="fas fa-pause"></i> Przerwa
+                    </button>
+                </div>
+                
+                <div class="client-card">
+                    <h3><i class="fas fa-users"></i> Wybierz klienta</h3>
+                    <select id="client-select" class="client-select">
+                        <option value="">-- Wybierz klienta --</option>
+                        <!-- Klienci będą ładowani dynamicznie -->
+                    </select>
+                    
+                    <div class="client-info">
+                        <h4>Aktualny klient:</h4>
+                        <div id="current-client" class="current-client">Nie wybrano</div>
+                    </div>
+                </div>
+                
+                <div class="photo-card">
+                    <h3><i class="fas fa-camera"></i> Dokumentacja zdjęciowa</h3>
+                    <button id="take-photo-btn" class="btn-control photo">
+                        <i class="fas fa-camera"></i> Zrób zdjęcie
+                    </button>
+                    <input type="file" id="photo-upload" accept="image/*" capture="environment" hidden>
+                    
+                    <div class="photo-preview" id="photo-preview">
+                        <p>Kliknij przycisk, aby dodać zdjęcie</p>
+                    </div>
+                    
+                    <div class="photo-actions">
+                        <input type="text" id="photo-description" placeholder="Opis zdjęcia...">
+                        <button id="save-photo-btn" class="btn-control save" disabled>
+                            <i class="fas fa-save"></i> Zapisz zdjęcie
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prawy panel - mapa i szczegóły -->
+            <div class="map-panel">
+                <div class="map-container">
+                    <div id="map" class="map"></div>
+                    <div class="map-controls">
+                        <button id="center-map-btn" class="map-btn">
+                            <i class="fas fa-location-arrow"></i> Centruj
+                        </button>
+                        <button id="clear-route-btn" class="map-btn">
+                            <i class="fas fa-trash"></i> Wyczyść trasę
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="details-panel">
+                    <div class="details-tabs">
+                        <button class="details-tab active" onclick="showDetailsTab('route')">
+                            <i class="fas fa-route"></i> Trasa
+                        </button>
+                        <button class="details-tab" onclick="showDetailsTab('photos')">
+                            <i class="fas fa-images"></i> Zdjęcia
+                        </button>
+                        <button class="details-tab" onclick="showDetailsTab('stats')">
+                            <i class="fas fa-chart-bar"></i> Statystyki
+                        </button>
+                    </div>
+                    
+                    <div id="route-tab" class="details-content active">
+                        <h4>Szczegóły trasy</h4>
+                        <div class="route-info">
+                            <div class="info-item">
+                                <span>Punkty trasy:</span>
+                                <span id="route-points">0</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Dystans:</span>
+                                <span id="route-distance">0 km</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Start:</span>
+                                <span id="route-start">--:--</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Koniec:</span>
+                                <span id="route-end">--:--</span>
+                            </div>
+                        </div>
+                        <div id="route-log" class="route-log">
+                            <p>Trasa nie została jeszcze rozpoczęta</p>
+                        </div>
+                    </div>
+                    
+                    <div id="photos-tab" class="details-content">
+                        <h4>Zdjęcia z pracy</h4>
+                        <div id="photos-gallery" class="photos-gallery">
+                            <p>Brak zdjęć</p>
+                        </div>
+                    </div>
+                    
+                    <div id="stats-tab" class="details-content">
+                        <h4>Statystyki dnia</h4>
+                        <div class="stats-info">
+                            <div class="stat-item">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <span class="stat-label">Łączny czas pracy:</span>
+                                    <span id="total-work-time" class="stat-value">0h 0m</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-walking"></i>
+                                <div>
+                                    <span class="stat-label">Przebyty dystans:</span>
+                                    <span id="total-distance" class="stat-value">0 km</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-camera"></i>
+                                <div>
+                                    <span class="stat-label">Zrobione zdjęcia:</span>
+                                    <span id="total-photos" class="stat-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stopka -->
+        <footer class="admin-footer">
+            <p><i class="fas fa-map-marked-alt"></i> System śledzenia pracy v1.0</p>
+            <p id="gps-status">
+                <i class="fas fa-satellite"></i> GPS: Ładowanie...
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Biblioteki JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script src="admin-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "email": "ww.ww@ww",
+    "password": "www",
+    "name": "Jan Kowalski",
+    "role": "client",
+    "clientId": "client_001"
+  },
+  {
+    "id": 2,
+    "email": "admin@test.pl",
+    "password": "admin123",
+    "name": "Michał Budowlany",
+    "role": "worker"
+  },
+  {
+    "id": 3,
+    "email": "nowyklient@firma.pl",
+    "password": "haslo123",
+    "name": "Firma Budowlana XYZ",
+    "role": "client",
+    "clientId": "client_002"
+  },
+  {
+    "id": 4,
+    "email": "pracownik2@firma.pl",
+    "password": "pracownik456",
+    "name": "Andrzej Nowak",
+    "role": "worker"
+  }
+]
